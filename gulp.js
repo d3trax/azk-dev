@@ -236,7 +236,14 @@ AzkGulp.prototype = {
           .pipe(self.changed(build_dir.dest, src_opts))
           .pipe(self.watching ? self.plumber() : self.gutil.noop())
           .pipe(self.debug({ title: "babel:" + name + " - transpiled:" }))
-          .pipe(self.sourcemaps.init())
+          .pipe(self.sourcemaps.write('.', {
+            includeContent: false,
+            file: function(file) {
+              return path.basename(file.path);
+            },
+            sourceRoot: function(file) {
+              return path.join(path.relative(file.path, self.config.cwd), build_dir.src);
+            }}))
           .pipe(self.babel(self.config.babel))
           .pipe(self.sourcemaps.write({ sourceRoot: path.join(self.sourcemaps_path, name) }))
           .pipe(self.gulp.dest(build_dir.dest, src_opts));
